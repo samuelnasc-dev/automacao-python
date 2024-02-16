@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from random import randint
 #biblioteca de controle de tempo
 import time
+from selenium.common import NoSuchElementException
 
 #só pra aleatorizar o tempo
 def wait(startTime, endTime):
@@ -91,9 +92,15 @@ class InstaBot:
         self.followers = new_followers_array
 
         print(self.followers)
+        #print("Tamanho do vetor: " + len(self.followers))
 
     def seguir_usuarios(self, number_to_follow):
         navegador = self.navegador
+
+        #contador de seguidores
+        i=0
+         #auxiliar
+        aux = 0
 
         print("Vou entrar no perfil do caba")
         for follower in self.followers:
@@ -102,7 +109,6 @@ class InstaBot:
             print("entrei no perfil do caba")
             wait(5,9)
 
-
             try:
                 visible = navegador.find_element(By.CSS_SELECTOR, "._aa_u").text
                 print(visible)
@@ -110,26 +116,32 @@ class InstaBot:
                 #Se eles forem privados, não podemos ver sua lista de seguidores, então pule-os
                     print("Essa conta é privada, vou pular!")
                     continue
-            except:
-                navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
-                print("Segui o caba")
+            except NoSuchElementException:
+                try:
+                    following = navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div[1]/button/div/div[1]').text
 
-            """ if navegador.find_element(By.CSS_SELECTOR, "._aa_u").text:
-                visible = navegador.find_element(By.CSS_SELECTOR, "._aa_u").text
-                #print(visible)
-                if visible == "This Account is Private":
-                    #Se eles forem privados, não podemos ver sua lista de seguidores, então pule-os
-                    print("Essa conta é privada, vou pular!")
-                    continue
-            else:
-                navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div/button').click() """
+                    if following == "Following":
+                        # se já estiver seguindo
+                        print("Essa conta já é seguida!!")
+                        aux = 1
+                        continue
+
+                except:
+                     if aux != 1:
+                        navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
+                        i+=1
+                        print("++++ Segui o " + follower)
+
+            aux = 0
+
+            if i == number_to_follow:
+                break
+        
             print("entrando no insta do prox")
             wait(5,9)
 
-
-
 #main
-insta = InstaBot('nytsuebanks','nytsuebanks#2024')
+insta = InstaBot('orrapodcast','orrapodcast#2023')
 wait(3,4)
 
 #login
@@ -137,7 +149,7 @@ insta.login()
 wait(2,5)
 
 #buscar seguidores
-insta.buscar_seguidores(5)
+insta.buscar_seguidores(9)
 wait(1,7)
 
 #seguir usuários
