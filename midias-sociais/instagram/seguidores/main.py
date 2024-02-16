@@ -92,21 +92,19 @@ class InstaBot:
         self.followers = new_followers_array
 
         print(self.followers)
-        #print("Tamanho do vetor: " + len(self.followers))
+        print("Tamanho do vetor: " + str(len(self.followers)))
 
     def seguir_usuarios(self, number_to_follow):
         navegador = self.navegador
 
         #contador de seguidores
-        i=0
-         #auxiliar
-        aux = 0
+        i=1
 
-        print("Vou entrar no perfil do caba")
+        print("- Vou entrar no perfil do caba")
         for follower in self.followers:
             print(follower)
             navegador.get('https://www.instagram.com/' + follower)
-            print("entrei no perfil do caba")
+            print("-- entrei no perfil do caba")
             wait(5,9)
 
             try:
@@ -114,34 +112,29 @@ class InstaBot:
                 print(visible)
                 if visible == "This Account is Private":
                 #Se eles forem privados, não podemos ver sua lista de seguidores, então pule-os
-                    print("Essa conta é privada, vou pular!")
+                    print("--- Essa conta é privada, vou pular!")
                     continue
             except NoSuchElementException:
-                try:
-                    following = navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div[1]/button/div/div[1]').text
+                is_follower = navegador.find_element(By.CSS_SELECTOR, "div._ap3a").text
 
-                    if following == "Following":
-                        # se já estiver seguindo
-                        print("Essa conta já é seguida!!")
-                        aux = 1
-                        continue
+                #verificar se já está seguindo
+                if is_follower != "Following":
+                    navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div[1]/button').click()
+                    print(str(follower) + "Seguido(a)")
+                    i+=1
+                    print("Seguidores seguidos: " + str(i))
+                    if i >= number_to_follow:
+                        break
 
-                except:
-                     if aux != 1:
-                        navegador.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div[2]/section/main/div/header/section/div[1]/div[1]/div/div/button').click()
-                        i+=1
-                        print("++++ Segui o " + follower)
+                else:
+                    print("---Conta já seguida!")
+                    continue
 
-            aux = 0
-
-            if i == number_to_follow:
-                break
-        
             print("entrando no insta do prox")
             wait(5,9)
 
 #main
-insta = InstaBot('orrapodcast','orrapodcast#2023')
+insta = InstaBot('benedomingo67','orrapodcast#2023')
 wait(3,4)
 
 #login
@@ -149,8 +142,9 @@ insta.login()
 wait(2,5)
 
 #buscar seguidores
-insta.buscar_seguidores(9)
+insta.buscar_seguidores(20)
 wait(1,7)
 
 #seguir usuários
 insta.seguir_usuarios(3)
+
