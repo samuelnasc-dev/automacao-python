@@ -1,5 +1,5 @@
 #autor: Samuel Nascimento
-#teste
+#Construindo um bot automatizado para alancar seguidores no instagram
 
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
