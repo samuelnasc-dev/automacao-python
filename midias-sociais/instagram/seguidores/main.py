@@ -1,5 +1,5 @@
 #autor: Samuel Nascimento
-#Construindo um bot automatizado para alancar seguidores no instagram
+#Construindo um bot automatizado para alavancar seguidores no instagram
 
 from selenium import webdriver
 from webdriver_manager.firefox import GeckoDriverManager
@@ -21,7 +21,8 @@ class InstaBot:
         self.username = username
         self.password = password
         #perfil que deve ser o primeiro a ser aberto
-        self.username_principal_profile = 'sigo.de_.volta_'
+        self.username_principal_profile = 'comunidade.sigo.de.volta_'
+        
         #servico e conecxao com o webdriver do firefox
         self.servico = Service(GeckoDriverManager().install())
         self.navegador = webdriver.Firefox(service=self.servico)
@@ -48,13 +49,19 @@ class InstaBot:
         wait(5,8)
         navegador.find_element(By.CSS_SELECTOR, "button._a9--:nth-child(2)").click()
 
-
-    def buscar_seguidores(self, followers_number):
+    def buscar_seguidores(self):
         navegador = self.navegador
 
         #entra no perfil que você quer começar a seguir
         wait(5,8)
         navegador.get('https://www.instagram.com/' + self.username_principal_profile)
+        
+        #pegar o total de seguidores
+        wait(3,5)
+        str_followers_number = navegador.find_element(By.CSS_SELECTOR, "li.xl565be:nth-child(2) > a:nth-child(1) > span:nth-child(1)").get_attribute("title")
+        total_followers = int(str_followers_number.replace(",",""))
+
+        print("Total de seguidores do perfil: " + str(total_followers))
 
         #entra na aba de seguidores
         wait(5,7)
@@ -70,7 +77,7 @@ class InstaBot:
 
         i=0
 
-        while len(followers_array) <= followers_number:
+        while len(followers_array) <= total_followers:
             navegador.execute_script('arguments[0].scrollTop = arguments[0].scrollHeight', popup_followers)
             print("Baixei o scroll")
             wait(4,6)
@@ -88,6 +95,14 @@ class InstaBot:
         new_followers_array = list(dict.fromkeys(followers_array))
         #deleta o primeiro elemento(idiomas no instagram)
         del new_followers_array[0]
+
+        #procura se seu própio nome está na array
+        find_nome = self.username_principal_profile in new_followers_array
+        if find_nome:
+            print("Encontrei seu próprio nome")
+            find_index = new_followers_array.index(self.username_principal_profile)
+            del new_followers_array[0]
+
         #salva a nova array
         self.followers = new_followers_array
 
@@ -98,13 +113,15 @@ class InstaBot:
         navegador = self.navegador
 
         #contador de seguidores
-        i=1
+        i=0
 
         print("- Vou entrar no perfil do caba")
         for follower in self.followers:
+
             print(follower)
             navegador.get('https://www.instagram.com/' + follower)
             print("-- entrei no perfil do caba")
+                
             wait(5,9)
 
             try:
@@ -123,7 +140,7 @@ class InstaBot:
                     print(str(follower) + "Seguido(a)")
                     i+=1
                     print("Seguidores seguidos: " + str(i))
-                    if i >= number_to_follow:
+                    if i == number_to_follow:
                         break
 
                 else:
@@ -139,12 +156,17 @@ wait(3,4)
 
 #login
 insta.login()
-wait(2,5)
 
 #buscar seguidores
-insta.buscar_seguidores(20)
-wait(1,7)
+insta.buscar_seguidores()
 
-#seguir usuários
-insta.seguir_usuarios(3)
+while True:
+    #seguir usuários
+    insta.seguir_usuarios(2)
+    print("fim por enquanto")
+    time.sleep(60)
 
+#O que ainda falta melhorar ou implementar?
+    #preciso ajeitar quando o meu proprio nome apareça na lista seguidores, ele não entre
+#pegar todos os seguidores do scroll.
+#Colocar umm time de a cada 60 segundos o robo seguir pelo menos 2 perfis.
